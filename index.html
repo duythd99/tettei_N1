@@ -52,7 +52,7 @@
             --blur-bg: #1B2B3A;
             --option-bg: #1B2B3A;
             --option-text: #E6F1FF;
-            --highlight-bg: rgba(255, 214, 165, 0.3);
+            --highlight-bg: rgba(255, 214, 165, 0.4);
             --highlight-text: #FFD6A5;
         }
 
@@ -95,8 +95,7 @@
             transition: color 0.2s;
         }
         #theme-toggle { right: 0; }
-        #offline-toggle { right: 38px; font-size: 19px;}
-        #color-custom-toggle { right: 76px; font-size: 19px; }
+        #color-custom-toggle { right: 38px; font-size: 19px; }
 
         .container { 
             width: 100%; 
@@ -155,7 +154,7 @@
         
         .flashcard-front, .flashcard-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 20px; padding: 25px 20px; box-sizing: border-box; background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
         .flashcard-front { display: flex; flex-direction: column; align-items: center; justify-content: center; transform: rotateY(0deg); -webkit-transform: rotateY(0deg); }
-        .flashcard-back { color: var(--text-color); display: flex; flex-direction: column; align-items: center; justify-content: space-around; text-align: center; transform: rotateY(180deg); -webkit-transform: rotateY(180deg); overflow-y: auto; }
+        .flashcard-back { color: var(--text-color); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; text-align: center; transform: rotateY(180deg); -webkit-transform: rotateY(180deg); overflow-y: auto; }
         
         .flashcard.flipped .flashcard-front { visibility: hidden; }
         .flashcard:not(.flipped) .flashcard-back { visibility: hidden; }
@@ -168,14 +167,14 @@
         .audio-btn { background: var(--primary); border: none; color: var(--bg-color); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
 
         .fb-container-top { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
-        .fb-hanviet { font-size: 24px; color: var(--text-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
-        .fb-kana { font-size: 18px; color: var(--text-muted); font-weight: 500; margin: 0; display: flex; align-items: center; justify-content: center; }
-        .fb-mean { font-size: 21px; font-weight: bold; margin: 4px 0; color: var(--text-color); }
+        .fb-hanviet { font-size: 26px; color: var(--text-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
+        .fb-kana { font-size: 19px; color: var(--text-muted); font-weight: 500; margin: 0; display: flex; align-items: center; justify-content: center; }
+        .fb-mean { font-size: 23px; font-weight: bold; margin: 4px 0; color: var(--text-color); }
 
         .blur-box { filter: blur(6px); background: var(--blur-bg); border-radius: 6px; padding: 2px 10px; cursor: pointer; color: transparent; display: inline-block; transition: filter 0.25s; user-select: none; }
         .blur-box.revealed { filter: none; background: transparent; color: inherit; user-select: text; }
 
-        mark.highlight-word { background-color: var(--highlight-bg); color: var(--highlight-text); font-weight: bold; padding: 0 4px; border-radius: 4px; }
+        mark.highlight-word { background-color: var(--highlight-bg); color: var(--highlight-text); font-weight: bold; padding: 0 2px; border-radius: 4px; }
 
         .nav-buttons { display: flex; justify-content: space-between; align-items: stretch; width: 100%; gap: 10px; margin-top: 4px; }
         .nav-btn { padding: 14px 4px; border-radius: 16px; font-weight: bold; cursor: pointer; font-size: 15px; border: 1.5px solid transparent; transition: all 0.2s; display: flex; align-items: center; justify-content: center; }
@@ -233,6 +232,7 @@
         .vocab-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; white-space: nowrap; }
         .vocab-table th, .vocab-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .vocab-table th { background: var(--primary); color: var(--bg-color); position: sticky; top: 0; z-index: 100; font-weight: 600; }
+        .vocab-table th:first-child, .vocab-table td:first-child { text-align: center; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
         .modal-content { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 35px 24px 28px 24px; text-align: center; position: relative; width: 88%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2011; }
@@ -241,10 +241,7 @@
         .modal-kanji { font-size: 64px; font-weight: bold; color: var(--text-color); font-family: "Klee One", "UD Digi Kyokasho N-R", serif; }
         .modal-hanviet { margin-top: 8px; font-size: 16px; font-weight: bold; color: var(--accent); text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
         .modal-kana { margin-top: 4px; font-size: 15px; color: var(--text-color); }
-        .modal-meaning { margin-top: 8px; font-size: 18px; font-weight: 600; }
-        .modal-divider { border: none; border-top: 1px dashed var(--border-color); margin: 16px 0; }
-        .modal-example-jp { font-size: 15px; color: var(--text-color); line-height: 1.4; margin-bottom: 6px; }
-        .modal-example-vi { font-size: 13px; color: var(--text-muted); line-height: 1.4; display: inline-block; }
+        .modal-meaning { margin-top: 8px; font-size: 18px; font-weight: 600; margin-bottom: 8px; }
         
         .modal-action-btn { background-color: transparent; border: 1.5px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: all 0.2s; }
         .modal-action-btn:hover { background-color: var(--primary); color: var(--bg-color); }
@@ -252,8 +249,6 @@
         .color-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; text-align: left; font-size: 13px; }
         .picker-item { display: flex; flex-direction: column; gap: 4px; }
         .picker-item input { width: 100%; height: 34px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; }
-        
-        .gen-btn { background: var(--accent); border: none; color: #1E3A8A; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -261,7 +256,6 @@
 <div class="header-row">
     <h1 class="title">徹底 N1</h1>
     <button id="color-custom-toggle" class="theme-toggle-btn" onclick="openColorCustomPopup()" title="Tùy chỉnh màu">🎨</button>
-    <button id="offline-toggle" class="theme-toggle-btn" onclick="toggleOffline()" title="Bật/Tắt chế độ Offline">📶</button>
     <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Sáng/Tối">☀️</button>
 </div>
 
@@ -312,17 +306,6 @@
                     <div style="font-size: 14px; color: var(--text-color); margin: 5px 0; display:none;" id="fc-same-box">
                         Từ đồng nghĩa: <span class="blur-box" id="fc-same" onclick="revealBlur(event, this)"></span>
                     </div>
-                    
-                    <div style="font-size:14px; border-top:1px dashed var(--border-color); padding-top:12px; width:100%; display: flex; flex-direction: column; align-items: center; gap: 8px;" id="fc-ex-box">
-                        <div id="fc-ex-content" style="display:none; flex-direction:column; align-items:center; gap:8px; width:100%;">
-                            <div style="display: flex; align-items: center; justify-content: center;">
-                                <span id="fc-ex-jp" style="font-style:italic; font-size:15px; color: var(--text-color); text-align: center;"></span>
-                                <button class="audio-btn" onclick="speakCurrentExample(event)">🔊</button>
-                            </div>
-                            <span class="blur-box" id="fc-ex-vi" onclick="revealBlur(event, this)"></span>
-                        </div>
-                        <button id="fc-btn-generate" class="gen-btn" onclick="generateExampleForActiveWord(event)">💡 Tạo câu ví dụ</button>
-                    </div>
                 </div>
             </div>
         </div>
@@ -351,7 +334,7 @@
         </div>
 
         <footer>
-            <a id="fc-gemini" href="#" target="_blank" onclick="handleExternalLink(event)">🔍 Tra Gemini</a>
+            <a id="fc-gemini" href="#" target="_blank">🔍 Tra Gemini</a>
             <span style="color:var(--border-color)">|</span>
             <a onclick="openMaziiApp(event)">📖 Từ điển Mazii</a>
         </footer>
@@ -431,9 +414,6 @@
         <div id="modal-hanviet-text" class="modal-hanviet"></div>
         <div id="modal-kana-text" class="modal-kana"></div>
         <div id="modal-meaning-text" class="modal-meaning"></div>
-        <hr class="modal-divider">
-        <div id="modal-example-jp" class="modal-example-jp"></div>
-        <div id="modal-example-vi" class="modal-example-vi blur-box" onclick="revealBlur(event, this)"></div>
         <div>
             <button class="modal-action-btn" onclick="openMaziiFromPopup(event)">📖 Tra từ điển Mazii</button>
         </div>
@@ -514,8 +494,6 @@
         document.documentElement.setAttribute('data-theme', savedTheme);
         applySavedCustomColors(savedTheme);
     })();
-
-    let isOfflineMode = false;
 
     function unlockAudio() {
         try {
@@ -626,26 +604,6 @@
         return "#" + hex(match[1]) + hex(match[2]) + hex(match[3]);
     }
 
-    function toggleOffline() {
-        isOfflineMode = !isOfflineMode;
-        const iconBtn = document.getElementById('offline-toggle');
-        iconBtn.innerText = isOfflineMode ? '📴' : '📶';
-        iconBtn.style.color = isOfflineMode ? 'var(--error)' : 'inherit';
-        
-        if (isOfflineMode) {
-            alert("Đã BẬT chế độ Offline 📴.\nPhát âm thanh, tra từ điển Mazii & Gemini sẽ bị khóa để không tốn Data mạng.");
-        } else {
-            alert("Đã TẮT chế độ Offline 📶.\nCác tính năng mạng hoạt động bình thường.");
-        }
-    }
-
-    function handleExternalLink(e) {
-        if(isOfflineMode) {
-            e.preventDefault();
-            alert("Bạn đang ở chế độ Offline 📴.\nVui lòng bật lại mạng (📶) để sử dụng tính năng tra cứu ngoại tuyến!");
-        }
-    }
-
     function autoTranslateHanViet(text, customDb) {
         if (!text) return "";
         const activeDb = customDb || db;
@@ -660,41 +618,12 @@
         return result.length > 0 ? result.join(" ") : "";
     }
 
-    function generateAutoExample(kanji, meaning) {
-        if (!kanji) return { j: "", v: "" };
-        const templates = [
-            {
-                j: `文章の文脈に合わせて、「${kanji}」を正しく使い分けることが表現力を高める鍵です。`,
-                v: `Việc sử dụng đúng từ 「${meaning || kanji}」 phù hợp với ngữ cảnh của đoạn văn là chìa khóa để nâng cao khả năng diễn đạt.`
-            },
-            {
-                j: `ビジネスの場において、「${kanji}」という概念を深く理解しておくことは非常に重要です。`,
-                v: `Trong môi trường kinh doanh, việc hiểu sâu sắc khái niệm 「${meaning || kanji}」 là điều vô cùng quan trọng.`
-            },
-            {
-                j: `高度な日本語をマスターするためには、「${kanji}」のようなN1レベルの語彙が欠かせません。`,
-                v: `Để làm chủ tiếng Nhật cao cấp, các từ vựng cấp độ N1 như 「${meaning || kanji}」 là không thể thiếu.`
-            },
-            {
-                j: `最新 của 論文によると、この実験結果は「${kanji}」の重要性を明確に示している。`,
-                v: `Theo các luận văn mới nhất, kết quả thực nghiệm này đã chỉ ra một cách rõ ràng tầm quan trọng của 「${meaning || kanji} LIGHT」.`
-            },
-            {
-                j: `専門家は、今後の社会情勢において「${kanji}」のプロセスが加速すると分析している。`,
-                v: `Các chuyên gia phân tích rằng trong tình hình xã hội tới đây, quá trình 「${meaning || kanji}」 sẽ tăng tốc.`
-            }
-        ];
-        
-        let index = 0;
-        for (let i = 0; i < kanji.length; i++) { index += kanji.charCodeAt(i); }
-        return templates[index % templates.length];
-    }
-
-    function highlightKeyword(sentence, keyword) {
-        if (!sentence || !keyword) return sentence || '';
+    function highlightSearchKeyword(text, keyword) {
+        if (!text) return '---';
+        if (!keyword) return text;
         const escapedKeyword = keyword.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
-        const regex = new RegExp(escapedKeyword, 'g');
-        return sentence.replace(regex, `<mark class="highlight-word">${keyword}</mark>`);
+        const regex = new RegExp(`(${escapedKeyword})`, 'gi');
+        return text.replace(regex, `<mark class="highlight-word">$1</mark>`);
     }
 
     function initSheetSelect() {
@@ -771,7 +700,7 @@
                 });
 
                 if (Object.keys(newDb).filter(k => k !== '_amHanViet').length > 0) {
-                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp thành công! Hãy bấm nút 'Tạo câu ví dụ' ở từng từ khi học."); initSheetSelect();
+                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp thành công!"); initSheetSelect();
                 } else { alert("Lỗi định dạng dữ liệu tệp!"); }
             } catch (err) { alert("Lỗi: " + err.message); }
         };
@@ -846,22 +775,6 @@
             sameBox.style.display = 'block'; 
         } else { sameBox.style.display = 'none'; }
 
-        // Logic ẩn hiện khu vực Ví dụ & Nút bấm tạo câu
-        const exContent = document.getElementById('fc-ex-content');
-        const btnGen = document.getElementById('fc-btn-generate');
-        
-        if (word.exampleJp) {
-            document.getElementById('fc-ex-jp').innerHTML = highlightKeyword(word.exampleJp, word.kanji);
-            const viEl = document.getElementById('fc-ex-vi');
-            viEl.innerText = word.exampleVi || 'Chưa có bản dịch';
-            viEl.classList.remove('revealed'); 
-            exContent.style.display = 'flex';
-            btnGen.style.display = 'none';
-        } else {
-            exContent.style.display = 'none';
-            btnGen.style.display = 'block';
-        }
-
         const total = currentList.length;
         const currentPos = activeWordIndex + 1;
         const pct = Math.round((currentPos / total) * 100);
@@ -874,31 +787,8 @@
         document.getElementById('fc-gemini').href = `https://gemini.google.com/?q=Phân tích từ vựng N1: "${word.kanji}"`;
     }
 
-    function generateExampleForActiveWord(e) {
-        if(e) e.stopPropagation();
-        if(currentList.length === 0) return;
-        const word = currentList[activeWordIndex];
-        
-        let autoEx = generateAutoExample(word.kanji, word.meaning);
-        word.exampleJp = autoEx.j;
-        word.exampleVi = autoEx.v;
-        
-        // Tìm và đồng bộ ngược lại Database tổng để đồng bộ dữ liệu lâu dài
-        if (db[currentSheetName]) {
-            const originWord = db[currentSheetName].find(w => w.kanji === word.kanji);
-            if (originWord) {
-                originWord.exampleJp = autoEx.j;
-                originWord.exampleVi = autoEx.v;
-            }
-        }
-        
-        saveToLocalStorage();
-        updateFlashcard();
-    }
-
     async function openMaziiApp(e) {
         if(e) e.stopPropagation();
-        if (isOfflineMode) { alert("Bạn đang ở chế độ Offline 📴."); return; }
         if(currentList.length === 0) return;
         const word = currentList[activeWordIndex];
         const text = word.kanji;
@@ -914,7 +804,6 @@
 
     async function openMaziiFromPopup(e) {
         if(e) e.stopPropagation();
-        if (isOfflineMode) { alert("Bạn đang ở chế độ Offline 📴."); return; }
         const kanjiText = document.getElementById('modal-kanji-text').innerText;
         if(!kanjiText || kanjiText === '-') return;
         try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(kanjiText); } } catch (err) { }
@@ -988,7 +877,6 @@
 
     function speakJapaneseText(e, text) { 
         if(e) e.stopPropagation(); 
-        if (isOfflineMode) { alert("Đang ở chế độ Offline 📴."); return; }
         if(!text) return;
         try { window.speechSynthesis.cancel(); } catch(err) { }
         const cleanText = text.replace(/<[^>]*>/g, ''); 
@@ -1005,7 +893,6 @@
     }
     
     function speakCurrentWord(e) { const w = currentList[activeWordIndex]; speakJapaneseText(e, w.kana || w.kanji); }
-    function speakCurrentExample(e) { speakJapaneseText(e, currentList[activeWordIndex].exampleJp); }
     function revealBlur(e, el) { if(e) e.stopPropagation(); el.classList.toggle('revealed'); }
 
     let typeCurrent = null;
@@ -1152,14 +1039,20 @@
                 
                 const positionAnnotation = keyword ? `<small style="display:block;color:var(--text-muted);font-size:10px;">${sheetName}</small>Dòng ${index + 2}` : `${index + 2}`;
 
+                const actualHv = w.hanviet || autoTranslateHanViet(w.kanji);
+                const displayKanji = highlightSearchKeyword(w.kanji, keyword);
+                const displayHanviet = highlightSearchKeyword(actualHv, keyword);
+                const displayKana = highlightSearchKeyword(w.kana, keyword);
+                const displayMeaning = highlightSearchKeyword(w.meaning, keyword);
+
                 tr.innerHTML = `
                     <td>${positionAnnotation}</td>
                     <td onclick="event.stopPropagation(); toggleStarFromList('${sheetName}', ${index})">${w.starred ? '⭐' : '☆'}</td>
                     <td>${w.flipCount || 0}</td>
-                    <td style="font-weight: bold; color: var(--text-color); text-decoration: underline dotted;">${w.kanji}</td>
-                    <td style="color: var(--accent); font-weight: bold; text-transform: uppercase;">${w.hanviet || autoTranslateHanViet(w.kanji)}</td>
-                    <td>${w.kana || '---'}</td>
-                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${w.meaning}</td>`;
+                    <td style="font-weight: bold; color: var(--text-color); text-decoration: underline dotted;">${displayKanji}</td>
+                    <td style="color: var(--accent); font-weight: bold; text-transform: uppercase;">${displayHanviet}</td>
+                    <td>${displayKana}</td>
+                    <td style="max-width: 150px; overflow: hidden; text-overflow: ellipsis;">${displayMeaning}</td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -1185,14 +1078,6 @@
         document.getElementById('modal-hanviet-text').innerText = word.hanviet || autoTranslateHanViet(word.kanji);
         document.getElementById('modal-kana-text').innerText = word.kana ? `[ ${word.kana} ]` : '';
         document.getElementById('modal-meaning-text').innerText = word.meaning;
-        const modalViEl = document.getElementById('modal-example-vi'); modalViEl.classList.remove('revealed'); 
-
-        if (word.exampleJp) {
-            document.getElementById('modal-example-jp').innerHTML = highlightKeyword(word.exampleJp, word.kanji);
-            modalViEl.innerText = word.exampleVi || 'Chưa có bản dịch'; modalViEl.style.display = 'inline-block';
-        } else {
-            document.getElementById('modal-example-jp').innerText = 'Chưa cập nhật ví dụ.'; modalViEl.innerText = ''; modalViEl.style.display = 'none';
-        }
         document.getElementById('kanji-popup').style.display = 'flex';
     }
 
