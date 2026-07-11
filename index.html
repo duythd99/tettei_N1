@@ -9,7 +9,7 @@
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="N1 Flashcard">
+    <meta name="apple-mobile-web-app-title" content="N1 Tettei">
     <meta name="mobile-web-app-capable" content="yes">
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -139,7 +139,7 @@
         .file-input-label:hover { background-color: var(--border-color); }
         #excel-file { display: none; }
 
-        .bookmark-filter { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--text-muted); margin: -2px 0; cursor: pointer; font-weight: 500; }
+        .bookmark-filter { display: flex; align-items: center; justify-content: center; gap: 6px; font-size: 13px; color: var(--text-muted); cursor: pointer; font-weight: 500; }
 
         .mode-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .mode-btn { background-color: transparent; color: var(--text-muted); border: 1.5px solid var(--border-color); padding: 12px 2px; border-radius: 12px; font-size: 13px; cursor: pointer; font-weight: 600; text-align: center; transition: all 0.2s;}
@@ -228,7 +228,7 @@
         .search-input { width: 100%; padding: 10px 14px; font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; outline: none; color: var(--text-color); box-sizing: border-box; transition: border-color 0.2s; font-family: "Noto Sans JP", sans-serif;}
         .search-input:focus { border-color: var(--border-color); }
 
-        .vocab-table-wrapper { height: 400px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); -webkit-overflow-scrolling: touch; margin-bottom: 5px; }
+        .vocab-table-wrapper { height: calc(100vh - 290px); min-height: 420px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); -webkit-overflow-scrolling: touch; margin-bottom: 5px; }
         .vocab-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; white-space: nowrap; }
         .vocab-table th, .vocab-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .vocab-table th { background: var(--primary); color: var(--bg-color); position: sticky; top: 0; z-index: 100; font-weight: 600; }
@@ -269,9 +269,19 @@
         <input type="file" id="excel-file" accept=".xlsx, .xls" onchange="handleExcelUpload(event)">
     </div>
 
-    <label class="bookmark-filter">
-        <input type="checkbox" id="only-bookmarked" onchange="toggleStarredFilter()"> ⭐ Từ cần chú ý
-    </label>
+    <div style="display: flex; justify-content: center; align-items: center; gap: 12px; margin: -2px 0;">
+        <label class="bookmark-filter">
+            <input type="checkbox" id="only-bookmarked" onchange="filterData()"> ⭐ Từ cần chú ý
+        </label>
+        <select id="level-filter" onchange="filterData()" style="background-color: var(--card-bg); color: var(--text-color); border: 1px solid var(--border-color); border-radius: 8px; padding: 4px 8px; font-size: 12px; font-weight: 600; outline: none; cursor: pointer;">
+            <option value="all">📊 Tất cả mức độ</option>
+            <option value="again">🔄 Học lại</option>
+            <option value="hard">🧠 Khó</option>
+            <option value="good">👍 Tốt</option>
+            <option value="easy">⭐ Dễ</option>
+            <option value="unlearned">🆕 Chưa học</option>
+        </select>
+    </div>
 
     <div class="mode-buttons">
         <button class="mode-btn active" onclick="switchTab('tab-flashcard', this)">Flashcard</button>
@@ -327,10 +337,10 @@
         </div>
 
         <div class="difficulty-panel">
-            <button class="diff-btn diff-again" onclick="handleDifficulty('again', event)"><span class="diff-icon">🔄</span>Học lại<span>Again</span></button>
-            <button class="diff-btn diff-hard" onclick="handleDifficulty('hard', event)"><span class="diff-icon">🧠</span>Khó<span>Hard</span></button>
-            <button class="diff-btn diff-good" onclick="handleDifficulty('good', event)"><span class="diff-icon">👍</span>Tốt<span>Good</span></button>
-            <button class="diff-btn diff-easy" onclick="handleDifficulty('easy', event)"><span class="diff-icon">⭐</span>Dễ<span>Easy</span></button>
+            <button class="diff-btn diff-again" onclick="handleDifficulty('again', event)"><span class="diff-icon">🔄</span>Học lại<span id="badge-again">Again (0)</span></button>
+            <button class="diff-btn diff-hard" onclick="handleDifficulty('hard', event)"><span class="diff-icon">🧠</span>Khó<span id="badge-hard">Hard (0)</span></button>
+            <button class="diff-btn diff-good" onclick="handleDifficulty('good', event)"><span class="diff-icon">👍</span>Tốt<span id="badge-good">Good (0)</span></button>
+            <button class="diff-btn diff-easy" onclick="handleDifficulty('easy', event)"><span class="diff-icon">⭐</span>Dễ<span id="badge-easy">Easy (0)</span></button>
         </div>
 
         <footer>
@@ -515,7 +525,7 @@
 
     let db = JSON.parse(localStorage.getItem('jlpt_kanji_db')) || {
         "N1_Mondai_Demo": [
-            { kanji: "維持", kana: "いじ", meaning: "duy trì", exampleJp: "", exampleVi: "", synonym: "キープ", hanviet: "DUY TRÌ", flipCount: 0, starred: false, interval: 0, ease: 2.5, nextReview: 0 }
+            { kanji: "維持", kana: "いじ", meaning: "duy trì", exampleJp: "", exampleVi: "", synonym: "キープ", hanviet: "DUY TRÌ", flipCount: 0, starred: false, interval: 0, ease: 2.5, nextReview: 0, difficulty: "unlearned" }
         ]
     };
     let currentList = [], activeWordIndex = 0, currentSheetName = "";
@@ -691,7 +701,8 @@
                                 synonym: "", 
                                 hanviet: hv, 
                                 flipCount: 0, starred: false,
-                                interval: 0, ease: 2.5, nextReview: 0
+                                interval: 0, ease: 2.5, nextReview: 0,
+                                difficulty: "unlearned"
                             });
                         } else { emptyStreak++; }
                         rowIndex++;
@@ -707,11 +718,35 @@
         reader.readAsArrayBuffer(file);
     }
 
+    function getWordDifficulty(w) {
+        if (w.difficulty) return w.difficulty;
+        if (!w.interval || w.interval === 0) return 'unlearned';
+        if (w.interval === 1) return 'again';
+        if (w.interval <= 9) return 'hard';
+        if (w.interval <= 29) return 'good';
+        return 'easy';
+    }
+
+    function updateDifficultyCounters() {
+        const full = db[currentSheetName] || [];
+        let counts = { again: 0, hard: 0, good: 0, easy: 0 };
+        full.forEach(w => {
+            const lvl = getWordDifficulty(w);
+            if (counts[lvl] !== undefined) counts[lvl]++;
+        });
+        document.getElementById('badge-again').innerText = `Again (${counts.again})`;
+        document.getElementById('badge-hard').innerText = `Hard (${counts.hard})`;
+        document.getElementById('badge-good').innerText = `Good (${counts.good})`;
+        document.getElementById('badge-easy').innerText = `Easy (${counts.easy})`;
+    }
+
     function loadSheet() {
         const selectVal = document.getElementById('lesson-select').value;
         currentSheetName = selectVal || Object.keys(db).filter(k => k !== '_amHanViet')[0];
         if (!currentSheetName) return;
+        
         document.getElementById('only-bookmarked').checked = false;
+        document.getElementById('level-filter').value = 'all';
         
         const searchInput = document.getElementById('vocab-search-input');
         if(searchInput) searchInput.value = '';
@@ -721,10 +756,39 @@
             if (w.interval === undefined) w.interval = 0;
             if (w.ease === undefined) w.ease = 2.5;
             if (w.nextReview === undefined) w.nextReview = 0;
+            if (!w.difficulty) w.difficulty = getWordDifficulty(w);
             return w; 
         });
-        activeWordIndex = 0; updateFlashcard(); resetTypingCounters();
+        
+        activeWordIndex = 0; 
+        updateFlashcard(); 
+        resetTypingCounters();
+        updateDifficultyCounters();
         if(document.getElementById('tab-manager').style.display === 'flex') { renderManagerList(); }
+    }
+
+    function filterData() {
+        const full = db[currentSheetName] || [];
+        const isOnlyBookmarked = document.getElementById('only-bookmarked').checked;
+        const selectedLevel = document.getElementById('level-filter').value;
+        
+        currentList = full.filter(w => {
+            const matchStarred = !isOnlyBookmarked || w.starred;
+            const matchLevel = selectedLevel === 'all' || getWordDifficulty(w) === selectedLevel;
+            return matchStarred && matchLevel;
+        });
+        
+        if (currentList.length === 0) {
+            alert("Không có từ vựng nào thuộc nhóm bộ lọc này!");
+            document.getElementById('only-bookmarked').checked = false;
+            document.getElementById('level-filter').value = 'all';
+            currentList = [...full];
+        }
+        
+        activeWordIndex = 0; 
+        updateFlashcard(); 
+        filterManagerList();
+        updateDifficultyCounters();
     }
 
     function saveToLocalStorage() { 
@@ -794,12 +858,7 @@
         const text = word.kanji;
         try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); } } catch (err) { }
         const keyword = encodeURIComponent(text);
-        const webUrl = `https://mazii.net/vi-VN/search/word/ja/${keyword}`;
-        const appUrl = `mazii://search/${keyword}`;
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            const startTime = Date.now(); window.location.href = appUrl;
-            setTimeout(() => { if (Date.now() - startTime < 800) { window.location.href = webUrl; } }, 500);
-        } else { window.open(webUrl, '_blank'); }
+        window.open(`https://mazii.net/vi-VN/search/word/ja/${keyword}`, '_blank');
     }
 
     async function openMaziiFromPopup(e) {
@@ -808,12 +867,7 @@
         if(!kanjiText || kanjiText === '-') return;
         try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(kanjiText); } } catch (err) { }
         const keyword = encodeURIComponent(kanjiText);
-        const webUrl = `https://mazii.net/vi-VN/search/word/ja/${keyword}`;
-        const appUrl = `mazii://search/${keyword}`;
-        if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
-            const startTime = Date.now(); window.location.href = appUrl;
-            setTimeout(() => { if (Date.now() - startTime < 800) { window.location.href = webUrl; } }, 500);
-        } else { window.open(webUrl, '_blank'); }
+        window.open(`https://mazii.net/vi-VN/search/word/ja/${keyword}`, '_blank');
     }
 
     function handleDifficulty(level, event) {
@@ -825,6 +879,8 @@
         
         if (!word.interval) word.interval = 0;
         if (!word.ease) word.ease = 2.5;
+
+        word.difficulty = level;
 
         if (level === 'again') {
             word.interval = 1; 
@@ -841,6 +897,7 @@
 
         word.nextReview = now + word.interval * 60 * 1000; 
         saveToLocalStorage();
+        updateDifficultyCounters();
         nextCard();
     }
 
@@ -867,12 +924,7 @@
     }
     
     function toggleStarredFilter() {
-        const full = db[currentSheetName] || [];
-        currentList = document.getElementById('only-bookmarked').checked ? full.filter(w => w.starred) : [...full];
-        if(currentList.length === 0) { alert("Chưa có thẻ đánh dấu!"); document.getElementById('only-bookmarked').checked = false; currentList = [...full]; }
-        const searchInput = document.getElementById('vocab-search-input');
-        if(searchInput) searchInput.value = '';
-        activeWordIndex = 0; updateFlashcard(); filterManagerList(); 
+        filterData();
     }
 
     function speakJapaneseText(e, text) { 
@@ -1007,6 +1059,7 @@
         const keyword = document.getElementById('vocab-search-input').value.trim().toLowerCase();
         const tbody = document.getElementById('vocab-list-tbody'); tbody.innerHTML = '';
         const isOnlyBookmarked = document.getElementById('only-bookmarked').checked;
+        const selectedLevel = document.getElementById('level-filter').value;
         
         for (const sheetName in db) {
             if (sheetName === '_amHanViet') continue;
@@ -1017,6 +1070,9 @@
             sheetWordsList.forEach((w, index) => {
                 const isStarredMatch = !isOnlyBookmarked || w.starred;
                 if (!isStarredMatch) return;
+                
+                const matchLevel = selectedLevel === 'all' || getWordDifficulty(w) === selectedLevel;
+                if (!matchLevel) return;
                 
                 const kj = (w.kanji || '').toLowerCase(); 
                 const hv = (w.hanviet || autoTranslateHanViet(w.kanji)).toLowerCase();
@@ -1064,11 +1120,10 @@
             listData[index].starred = !listData[index].starred; 
             saveToLocalStorage();
             if (sheetName === currentSheetName) {
-                const full = db[currentSheetName] || [];
-                currentList = document.getElementById('only-bookmarked').checked ? full.filter(w => w.starred) : [...full];
-                updateFlashcard();
+                filterData();
+            } else {
+                filterManagerList();
             }
-            filterManagerList(); 
         }
     }
 
