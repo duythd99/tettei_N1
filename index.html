@@ -20,43 +20,43 @@
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* BẢNG MÀU CHUẨN PASTEL THEO ẢNH THIẾT KẾ */
+        /* BẢNG MÀU CHUẨN PASTEL THEO ẢNH THIẾT KẾ OCEAN BLUE */
         :root[data-theme="light"] {
-            --bg-color: #E0F7FA;
-            --card-bg: #FFFFFF;
-            --primary: #FCE4EC;
-            --secondary: #E8F5E9;
-            --accent: #FFF3E0;
-            --success: #CCFFD8;
-            --warning: #FFE0B2;
-            --error: #FFCDD2;
-            --text-color: #1A1A1A;
-            --text-muted: #5C6BC0;
-            --border-color: #B2EBF2;
+            --bg-color: #F0F7FF;
+            --card-bg: #F0FFFF;
+            --primary: #7BB3FF;
+            --secondary: #A8D5FF;
+            --accent: #FFD6A5;
+            --success: #A7E3C2;
+            --warning: #FFE08A;
+            --error: #FFB3B3;
+            --text-color: #1E3A8A;
+            --text-muted: #947A88;
+            --border-color: #D6E4F7;
             --blur-bg: #E0F2F1;
             --option-bg: #FFFFFF;
-            --option-text: #1A1A1A;
-            --highlight-bg: rgba(255, 243, 224, 0.6);
-            --highlight-text: #E65100;
+            --option-text: #1E3A8A;
+            --highlight-bg: rgba(255, 214, 165, 0.6);
+            --highlight-text: #1E3A8A;
         }
 
         :root[data-theme="dark"] {
-            --bg-color: #1A1A1A;
-            --card-bg: #2D2D2D;
-            --primary: #3E2C4D;
-            --secondary: #224A32;
-            --accent: #5A412A;
-            --success: #2E5A36;
-            --warning: #684F12;
-            --error: #6B2D2D;
-            --text-color: #F8F9FA;
-            --text-muted: #A5A5A5;
-            --border-color: #3A3A3A;
-            --blur-bg: #2D2D2D;
-            --option-bg: #2D2D2D;
-            --option-text: #F8F9FA;
-            --highlight-bg: rgba(90, 65, 42, 0.4);
-            --highlight-text: #FFF3E0;
+            --bg-color: #0E1A2B;
+            --card-bg: #1B2B3A;
+            --primary: #7FB8FF;
+            --secondary: #9CC8FF;
+            --accent: #FFD6A5;
+            --success: #7BD4A3;
+            --warning: #FFC16A;
+            --error: #E681FF;
+            --text-color: #E6F1FF;
+            --text-muted: #A3B1C6;
+            --border-color: #23324A;
+            --blur-bg: #1B2B3A;
+            --option-bg: #1B2B3A;
+            --option-text: #E6F1FF;
+            --highlight-bg: rgba(255, 214, 165, 0.3);
+            --highlight-text: #FFD6A5;
         }
 
         body {
@@ -149,7 +149,7 @@
 
         .mode-buttons { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
         .mode-btn { background-color: transparent; color: var(--text-muted); border: 1.5px solid var(--border-color); padding: 12px 2px; border-radius: 12px; font-size: 13px; cursor: pointer; font-weight: 600; text-align: center; transition: all 0.2s;}
-        .mode-btn.active { background-color: var(--primary); color: var(--text-color); border-color: var(--border-color); }
+        .mode-btn.active { background-color: var(--primary); color: var(--bg-color); border-color: var(--border-color); }
 
         .tab-content { display: none; flex-direction: column; width: 100%; flex: 1; overflow: hidden; }
 
@@ -170,10 +170,10 @@
         .eye-icon { right: 15px; font-size: 12px; color: var(--text-muted); font-weight: 500; }
 
         .word-main { font-size: 52px; font-weight: bold; margin: 0; color: var(--text-color); font-family: "Noto Sans JP", sans-serif; }
-        .audio-btn { background: var(--primary); border: none; color: var(--text-color); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+        .audio-btn { background: var(--primary); border: none; color: var(--bg-color); border-radius: 50%; width: 32px; height: 32px; font-size: 13px; cursor: pointer; margin-left: 8px; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
 
         .fb-container-top { display: flex; flex-direction: column; align-items: center; gap: 4px; width: 100%; }
-        .fb-hanviet { font-size: 24px; color: var(--accent); font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
+        .fb-hanviet { font-size: 24px; color: var(--text-color); font-weight: bold; text-transform: uppercase; letter-spacing: 1.5px; margin: 0; }
         .fb-kana { font-size: 18px; color: var(--text-muted); font-weight: 500; margin: 0; display: flex; align-items: center; justify-content: center; }
         .fb-mean { font-size: 21px; font-weight: bold; margin: 4px 0; color: var(--text-color); }
 
@@ -190,7 +190,7 @@
         
         .nav-btn.btn-secondary { flex: 0.8; background-color: var(--secondary); color: var(--text-color); border: 1px solid var(--border-color); }
         
-        .nav-btn.btn-next { flex: 1.1; background-color: var(--primary); color: var(--text-color); border: 1px solid var(--border-color); }
+        .nav-btn.btn-next { flex: 1.1; background-color: var(--primary); color: var(--bg-color); border: 1px solid var(--border-color); }
 
         .progress-container { width: 100%; display: flex; flex-direction: column; gap: 4px; margin: 2px 0; }
         .progress-bar-bg { width: 100%; height: 6px; background-color: var(--border-color); border-radius: 3px; overflow: hidden; }
@@ -237,7 +237,7 @@
         .vocab-table-wrapper { flex: 1; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); -webkit-overflow-scrolling: touch; margin-bottom: 5px; }
         .vocab-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; white-space: nowrap; }
         .vocab-table th, .vocab-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
-        .vocab-table th { background: var(--primary); color: var(--text-color); position: sticky; top: 0; z-index: 100; font-weight: 600; }
+        .vocab-table th { background: var(--primary); color: var(--bg-color); position: sticky; top: 0; z-index: 100; font-weight: 600; }
 
         .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.6); z-index: 2000; justify-content: center; align-items: center; backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px); }
         .modal-content { background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 24px; padding: 35px 24px 28px 24px; text-align: center; position: relative; width: 88%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); z-index: 2011; }
@@ -252,7 +252,7 @@
         .modal-example-vi { font-size: 13px; color: var(--text-muted); line-height: 1.4; display: inline-block; }
         
         .modal-action-btn { background-color: transparent; border: 1.5px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: all 0.2s; }
-        .modal-action-btn:hover { background-color: var(--primary); }
+        .modal-action-btn:hover { background-color: var(--primary); color: var(--bg-color); }
 
         /* Color Custom Picker Style Form */
         .color-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; text-align: left; font-size: 13px; }
@@ -403,7 +403,7 @@
             <table class="vocab-table">
                 <thead>
                     <tr>
-                        <th>Mục - Dòng</th>
+                        <th>STT</th>
                         <th>⭐</th>
                         <th>👁️</th>
                         <th>Từ vựng</th>
@@ -678,7 +678,7 @@
                 v: `Theo các luận văn mới nhất, kết quả thực nghiệm này đã chỉ ra một cách rõ ràng tầm quan trọng của 「${meaning || kanji}」.`
             },
             {
-                j: `専門家は、今後の社会情勢において「${kanji}」のプロセスが加速すると分析している。`,
+                j: `専門家 là, 今後の社会情勢において「${kanji}」のプロセスが加速すると分析している。`,
                 v: `Các chuyên gia phân tích rằng trong tình hình xã hội tới đây, quá trình 「${meaning || kanji}」 sẽ tăng tốc.`
             }
         ];
