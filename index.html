@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>徹底 N1</title>
     
-    <!-- SỬA LỖI HIỂN THỊ VÀ CẤU HÌNH PWA CHUẨN TRÊN ĐIỆN THOẠI -->
     <link rel="manifest" href="manifest.json">
     <link rel="apple-touch-icon" href="icon.png">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -13,14 +12,12 @@
     <meta name="apple-mobile-web-app-title" content="N1 Flashcard">
     <meta name="mobile-web-app-capable" content="yes">
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
-        /* BẢNG MÀU CHUẨN PASTEL THEO ẢNH THIẾT KẾ OCEAN BLUE */
         :root[data-theme="light"] {
             --bg-color: #F0F7FF;
             --card-bg: #F0FFFF;
@@ -68,11 +65,10 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            height: 100vh;
+            min-height: 100vh;
             box-sizing: border-box;
             transition: background-color 0.3s, color 0.3s;
             -webkit-tap-highlight-color: transparent;
-            overflow: hidden;
         }
 
         .header-row {
@@ -100,7 +96,7 @@
         }
         #theme-toggle { right: 0; }
         #offline-toggle { right: 38px; font-size: 19px;}
-        #color-custom-toggle { right: 76px; font-size: 19px; } /* Vị trí ô đỏ yêu cầu */
+        #color-custom-toggle { right: 76px; font-size: 19px; }
 
         .container { 
             width: 100%; 
@@ -110,7 +106,6 @@
             flex-direction: column; 
             gap: 12px; 
             margin-bottom: calc(env(safe-area-inset-bottom) + 10px);
-            overflow: hidden;
         }
 
         .controls-row { 
@@ -151,7 +146,7 @@
         .mode-btn { background-color: transparent; color: var(--text-muted); border: 1.5px solid var(--border-color); padding: 12px 2px; border-radius: 12px; font-size: 13px; cursor: pointer; font-weight: 600; text-align: center; transition: all 0.2s;}
         .mode-btn.active { background-color: var(--primary); color: var(--bg-color); border-color: var(--border-color); }
 
-        .tab-content { display: none; flex-direction: column; width: 100%; flex: 1; overflow: hidden; }
+        .tab-content { display: none; flex-direction: column; width: 100%; flex: 1; }
 
         /* CARD STYLE */
         .flashcard { width: 100%; height: 320px; perspective: 1000px; margin: 4px 0; cursor: pointer; }
@@ -210,7 +205,7 @@
 
         .diff-btn span:last-child { font-size: 11px; font-weight: normal; opacity: 0.8; color: inherit; }
 
-        footer { display: flex; justify-content: center; gap: 15px; font-size: 13px; margin-top: auto; margin-bottom: 4px; padding-top: 8px; }
+        footer { display: flex; justify-content: center; gap: 15px; font-size: 13px; margin-top: auto; padding: 16px 0; width: 100%; }
         footer a { color: var(--text-muted); text-decoration: none; font-weight: bold; cursor: pointer; }
 
         /* GIAO DIỆN MỤC GÕ TỪ */
@@ -234,7 +229,7 @@
         .search-input { width: 100%; padding: 10px 14px; font-size: 14px; background-color: var(--card-bg); border: 1px solid var(--border-color); border-radius: 10px; outline: none; color: var(--text-color); box-sizing: border-box; transition: border-color 0.2s; font-family: "Noto Sans JP", sans-serif;}
         .search-input:focus { border-color: var(--border-color); }
 
-        .vocab-table-wrapper { flex: 1; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); -webkit-overflow-scrolling: touch; margin-bottom: 5px; }
+        .vocab-table-wrapper { height: 400px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-color); border-radius: 16px; background: var(--card-bg); -webkit-overflow-scrolling: touch; margin-bottom: 5px; }
         .vocab-table { width: 100%; border-collapse: collapse; font-size: 13px; text-align: left; white-space: nowrap; }
         .vocab-table th, .vocab-table td { padding: 14px 12px; border-bottom: 1px solid var(--border-color); vertical-align: middle; }
         .vocab-table th { background: var(--primary); color: var(--bg-color); position: sticky; top: 0; z-index: 100; font-weight: 600; }
@@ -254,10 +249,11 @@
         .modal-action-btn { background-color: transparent; border: 1.5px solid var(--border-color); color: var(--text-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 12px; transition: all 0.2s; }
         .modal-action-btn:hover { background-color: var(--primary); color: var(--bg-color); }
 
-        /* Color Custom Picker Style Form */
         .color-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; text-align: left; font-size: 13px; }
         .picker-item { display: flex; flex-direction: column; gap: 4px; }
         .picker-item input { width: 100%; height: 34px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; }
+        
+        .gen-btn { background: var(--accent); border: none; color: #1E3A8A; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 4px; }
     </style>
 </head>
 <body>
@@ -318,11 +314,14 @@
                     </div>
                     
                     <div style="font-size:14px; border-top:1px dashed var(--border-color); padding-top:12px; width:100%; display: flex; flex-direction: column; align-items: center; gap: 8px;" id="fc-ex-box">
-                        <div style="display: flex; align-items: center; justify-content: center;">
-                            <span id="fc-ex-jp" style="font-style:italic; font-size:15px; color: var(--text-color); text-align: center;"></span>
-                            <button class="audio-btn" onclick="speakCurrentExample(event)">🔊</button>
+                        <div id="fc-ex-content" style="display:none; flex-direction:column; align-items:center; gap:8px; width:100%;">
+                            <div style="display: flex; align-items: center; justify-content: center;">
+                                <span id="fc-ex-jp" style="font-style:italic; font-size:15px; color: var(--text-color); text-align: center;"></span>
+                                <button class="audio-btn" onclick="speakCurrentExample(event)">🔊</button>
+                            </div>
+                            <span class="blur-box" id="fc-ex-vi" onclick="revealBlur(event, this)"></span>
                         </div>
-                        <span class="blur-box" id="fc-ex-vi" onclick="revealBlur(event, this)"></span>
+                        <button id="fc-btn-generate" class="gen-btn" onclick="generateExampleForActiveWord(event)">💡 Tạo câu ví dụ</button>
                     </div>
                 </div>
             </div>
@@ -390,6 +389,9 @@
             </div>
             <p id="type-feedback" style="text-align:center; font-weight:bold; font-size:14px; height:20px; margin: 0;"></p>
         </div>
+        <footer>
+            <span style="opacity: 0.5; font-size: 11px;">徹底 N1 - Phiên bản Typing</span>
+        </footer>
     </div>
 
     <!-- TAB DANH SÁCH -->
@@ -415,6 +417,9 @@
                 <tbody id="vocab-list-tbody"></tbody>
             </table>
         </div>
+        <footer>
+            <span style="opacity: 0.5; font-size: 11px;">徹底 N1 - Phiên bản List</span>
+        </footer>
     </div>
 </div>
 
@@ -504,7 +509,6 @@
         });
     }
 
-    // KHỞI TẠO HỆ THỐNG MÀU SẮC TÙY CHỈNH THEO LOCALSTORAGE
     (function() {
         const savedTheme = localStorage.getItem('app_theme') || 'dark';
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -533,7 +537,7 @@
 
     let db = JSON.parse(localStorage.getItem('jlpt_kanji_db')) || {
         "N1_Mondai_Demo": [
-            { kanji: "維持", kana: "いじ", meaning: "duy trì", exampleJp: "高度な日本語をマスターするためには、「維持」のようなN1レベル của ngữ cảnh.", exampleVi: "Để làm chủ tiếng Nhật cao cấp, các từ vựng cấp độ N1 như 「duy trì」 là không thể thiếu.", synonym: "キープ", hanviet: "DUY TRÌ", flipCount: 0, starred: false, interval: 0, ease: 2.5, nextReview: 0 }
+            { kanji: "維持", kana: "いじ", meaning: "duy trì", exampleJp: "", exampleVi: "", synonym: "キープ", hanviet: "DUY TRÌ", flipCount: 0, starred: false, interval: 0, ease: 2.5, nextReview: 0 }
         ]
     };
     let currentList = [], activeWordIndex = 0, currentSheetName = "";
@@ -560,7 +564,6 @@
         document.getElementById('theme-toggle').innerText = currentTheme === 'light' ? '🌙' : '☀️';
     }
 
-    // CÁC HÀM XỬ LÝ CHO BỘ TÙY CHỈNH MÀU SẮC DỰA TRÊN LOCALSTORAGE
     function applySavedCustomColors(theme) {
         const customColors = JSON.parse(localStorage.getItem(`custom_colors_${theme}`));
         if (customColors) {
@@ -568,7 +571,6 @@
                 document.documentElement.style.setProperty(key, value);
             }
         } else {
-            // Xóa biến môi trường custom nếu dùng màu mặc định gốc
             const props = ['--bg-color', '--card-bg', '--primary', '--secondary', '--accent', '--text-color'];
             props.forEach(p => document.documentElement.style.removeProperty(p));
         }
@@ -674,11 +676,11 @@
                 v: `Để làm chủ tiếng Nhật cao cấp, các từ vựng cấp độ N1 như 「${meaning || kanji}」 là không thể thiếu.`
             },
             {
-                j: `最新の論文によると、この実験結果は「${kanji}」の重要性を明確に示している。`,
-                v: `Theo các luận văn mới nhất, kết quả thực nghiệm này đã chỉ ra một cách rõ ràng tầm quan trọng của 「${meaning || kanji}」.`
+                j: `最新 của 論文によると、この実験結果は「${kanji}」の重要性を明確に示している。`,
+                v: `Theo các luận văn mới nhất, kết quả thực nghiệm này đã chỉ ra một cách rõ ràng tầm quan trọng của 「${meaning || kanji} LIGHT」.`
             },
             {
-                j: `専門家 là, 今後の社会情勢において「${kanji}」のプロセスが加速すると分析している。`,
+                j: `専門家は、今後の社会情勢において「${kanji}」のプロセスが加速すると分析している。`,
                 v: `Các chuyên gia phân tích rằng trong tình hình xã hội tới đây, quá trình 「${meaning || kanji}」 sẽ tăng tốc.`
             }
         ];
@@ -751,14 +753,12 @@
                             
                             let targetMeaning = cellE && cellE.v !== undefined ? String(cellE.v).trim() : "";
                             
-                            let autoEx = generateAutoExample(valB, targetMeaning);
-                            
                             sheetData.push({
                                 kanji: valB, 
                                 kana: cellD && cellD.v !== undefined ? String(cellD.v).trim() : "",
                                 meaning: targetMeaning,
-                                exampleJp: autoEx.j, 
-                                exampleVi: autoEx.v, 
+                                exampleJp: "", 
+                                exampleVi: "", 
                                 synonym: "", 
                                 hanviet: hv, 
                                 flipCount: 0, starred: false,
@@ -771,7 +771,7 @@
                 });
 
                 if (Object.keys(newDb).filter(k => k !== '_amHanViet').length > 0) {
-                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp và tự động tạo câu ví dụ!"); initSheetSelect();
+                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp thành công! Hãy bấm nút 'Tạo câu ví dụ' ở từng từ khi học."); initSheetSelect();
                 } else { alert("Lỗi định dạng dữ liệu tệp!"); }
             } catch (err) { alert("Lỗi: " + err.message); }
         };
@@ -792,18 +792,19 @@
             if (w.interval === undefined) w.interval = 0;
             if (w.ease === undefined) w.ease = 2.5;
             if (w.nextReview === undefined) w.nextReview = 0;
-            if (!w.exampleJp) {
-                let autoEx = generateAutoExample(w.kanji, w.meaning);
-                w.exampleJp = autoEx.j;
-                w.exampleVi = autoEx.v;
-            }
             return w; 
         });
         activeWordIndex = 0; updateFlashcard(); resetTypingCounters();
         if(document.getElementById('tab-manager').style.display === 'flex') { renderManagerList(); }
     }
 
-    function saveToLocalStorage() { localStorage.setItem('jlpt_kanji_db', JSON.stringify(db)); }
+    function saveToLocalStorage() { 
+        try {
+            localStorage.setItem('jlpt_kanji_db', JSON.stringify(db)); 
+        } catch(e) {
+            console.log("Không thể lưu localStorage (Quota Exceeded), lưu tạm vào RAM.");
+        }
+    }
 
     function switchTab(tabId, btn) {
         document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
@@ -845,14 +846,21 @@
             sameBox.style.display = 'block'; 
         } else { sameBox.style.display = 'none'; }
 
-        const exBox = document.getElementById('fc-ex-box');
+        // Logic ẩn hiện khu vực Ví dụ & Nút bấm tạo câu
+        const exContent = document.getElementById('fc-ex-content');
+        const btnGen = document.getElementById('fc-btn-generate');
+        
         if (word.exampleJp) {
             document.getElementById('fc-ex-jp').innerHTML = highlightKeyword(word.exampleJp, word.kanji);
             const viEl = document.getElementById('fc-ex-vi');
             viEl.innerText = word.exampleVi || 'Chưa có bản dịch';
             viEl.classList.remove('revealed'); 
-            exBox.style.display = 'flex';
-        } else { exBox.style.display = 'none'; }
+            exContent.style.display = 'flex';
+            btnGen.style.display = 'none';
+        } else {
+            exContent.style.display = 'none';
+            btnGen.style.display = 'block';
+        }
 
         const total = currentList.length;
         const currentPos = activeWordIndex + 1;
@@ -864,6 +872,28 @@
         
         document.getElementById('flashcard-container').classList.remove('flipped');
         document.getElementById('fc-gemini').href = `https://gemini.google.com/?q=Phân tích từ vựng N1: "${word.kanji}"`;
+    }
+
+    function generateExampleForActiveWord(e) {
+        if(e) e.stopPropagation();
+        if(currentList.length === 0) return;
+        const word = currentList[activeWordIndex];
+        
+        let autoEx = generateAutoExample(word.kanji, word.meaning);
+        word.exampleJp = autoEx.j;
+        word.exampleVi = autoEx.v;
+        
+        // Tìm và đồng bộ ngược lại Database tổng để đồng bộ dữ liệu lâu dài
+        if (db[currentSheetName]) {
+            const originWord = db[currentSheetName].find(w => w.kanji === word.kanji);
+            if (originWord) {
+                originWord.exampleJp = autoEx.j;
+                originWord.exampleVi = autoEx.v;
+            }
+        }
+        
+        saveToLocalStorage();
+        updateFlashcard();
     }
 
     async function openMaziiApp(e) {
@@ -1086,17 +1116,13 @@
         document.getElementById('manager-title').innerText = `Bài học: ${currentSheetName}`; filterManagerList(); 
     }
 
-    // TRA CỨU TOÀN BỘ CÁC MỤC BÀI HỌC KHÁC NHAU VÀ CHÚ THÍCH RÕ RÀNG VỊ TRÍ
     function filterManagerList() {
         const keyword = document.getElementById('vocab-search-input').value.trim().toLowerCase();
         const tbody = document.getElementById('vocab-list-tbody'); tbody.innerHTML = '';
         const isOnlyBookmarked = document.getElementById('only-bookmarked').checked;
         
-        // Duyệt toàn bộ database các sheet để tìm kiếm diện rộng
         for (const sheetName in db) {
             if (sheetName === '_amHanViet') continue;
-            
-            // Nếu không có keyword, chỉ hiển thị dữ liệu bài học hiện tại để tối ưu giao diện
             if (!keyword && sheetName !== currentSheetName) continue;
             
             const sheetWordsList = db[sheetName] || [];
@@ -1110,12 +1136,10 @@
                 const mn = (w.meaning || '').toLowerCase(); 
                 const kn = (w.kana || '').toLowerCase();
                 
-                // Kiểm tra điều kiện tìm kiếm
                 if (keyword && !kj.includes(keyword) && !hv.includes(keyword) && !mn.includes(keyword) && !kn.includes(keyword)) return; 
 
                 let tr = document.createElement('tr');
                 
-                // Thiết lập hành động click xem chi tiết dựa theo mục bài học gốc của từ đó
                 tr.onclick = () => {
                     if (currentSheetName !== sheetName) {
                         document.getElementById('lesson-select').value = sheetName;
@@ -1126,7 +1150,6 @@
                     showKanjiPopup(index);
                 };
                 
-                // Hiển thị chú thích vị trí rõ ràng: Tên bài học kèm chỉ số dòng thực tế
                 const positionAnnotation = keyword ? `<small style="display:block;color:var(--text-muted);font-size:10px;">${sheetName}</small>Dòng ${index + 2}` : `${index + 2}`;
 
                 tr.innerHTML = `
