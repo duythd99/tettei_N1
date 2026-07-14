@@ -282,12 +282,17 @@
         .color-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; text-align: left; font-size: 12px; }
         .picker-item { display: flex; flex-direction: column; gap: 2px; }
         .picker-item input { width: 100%; height: 30px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; }
+
+        /* CSS ĐỒNG BỘ THIẾT BỊ */
+        .sync-section { margin-top: 6px; padding: 10px; background-color: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; }
+        .sync-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+        .sync-input { flex: 1; padding: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; outline: none; }
     </style>
 </head>
 <body>
 
 <div class="header-row">
-    <h1 class="title">N1 徹底 <h1>
+    <h1 class="title">N1 徹底 </h1>
     <button id="color-custom-toggle" class="theme-toggle-btn" onclick="openColorCustomPopup()" title="Tùy chỉnh màu">🎨</button>
     <button id="theme-toggle" class="theme-toggle-btn" onclick="toggleTheme()" title="Sáng/Tối">☀️</button>
 </div>
@@ -379,6 +384,18 @@
             <button id="btn-diff-hard" class="diff-btn diff-hard" onclick="handleDifficulty('hard', event)"><span class="diff-icon">Khó</span><span id="badge-hard">0</span></button>
             <button id="btn-diff-good" class="diff-btn diff-good" onclick="handleDifficulty('good', event)"><span class="diff-icon">Tốt</span><span id="badge-good">0</span></button>
             <button id="btn-diff-easy" class="diff-btn diff-easy" onclick="handleDifficulty('easy', event)"><span class="diff-icon">Dễ</span><span id="badge-easy">0</span></button>
+        </div>
+
+        <!-- BỔ SUNG CHỨC NĂNG ĐỒNG BỘ THIẾT BỊ QUA ID 6 SỐ -->
+        <div class="sync-section">
+            <div class="sync-row">
+                <span style="font-weight: bold;">ID của bạn: <span id="my-device-id" style="color: var(--primary);">------</span></span>
+                <button class="file-input-label" style="padding: 2px 6px;" onclick="uploadSyncData()">Cloud Sao lưu ☁️</button>
+            </div>
+            <div class="sync-row">
+                <input type="number" id="target-device-id" class="sync-input" placeholder="Nhập ID 6 số thiết bị khác...">
+                <button class="file-input-label" style="padding: 4px 8px;" onclick="downloadSyncData()">Đồng bộ kết nối 🔄</button>
+            </div>
         </div>
 
         <footer>
@@ -537,7 +554,7 @@
         });
     }
 
-    // TỐI ƯU HÓA TRÊN IPHONE: Khắc phục triệt để cuộn và tự động tính toán viewport dvh khớp màn hình tai thỏ/dynamic island
+    // TỐI ƯU HÓA TRÊN IPHONE
     window.addEventListener('pageshow', (event) => {
         window.scrollTo(0, 0);
         document.body.style.height = window.innerHeight + 'px';
@@ -579,10 +596,12 @@
     let typingStats = { correct: 0, wrong: 0, total: 0 };
     let typeHistoryList = []; 
     let currentUtterance = null; 
+    let typingPool = []; // Danh sách từ được lọc riêng cho chế độ gõ
 
     window.onload = () => { 
         updateThemeToggleIcon();
         initSheetSelect(); 
+        initDeviceSyncID();
     };
 
     function toggleTheme() {
@@ -837,6 +856,7 @@
         updateFlashcard(); 
         filterManagerList();
         updateDifficultyCounters();
+        resetTypingCounters(); // Cập nhật bộ lọc tương ứng cho phần gõ từ
     }
 
     function saveToLocalStorage() { 
@@ -1018,7 +1038,15 @@
     function revealBlur(e, el) { if(e) e.stopPropagation(); el.classList.toggle('revealed'); }
 
     let typeCurrent = null;
-    function resetTypingCounters() { typingStats = { correct: 0, wrong: 0, total: 0 }; updateTypingStatsUI(); loadNextType(); }
+    function resetTypingCounters() { 
+        typingStats = { correct: 0, wrong: 0, total: 0 }; 
+        // Tạo pool từ vựng đã lọc dựa trên bộ lọc áp dụng của `currentList`
+        typingPool = currentList.filter(w => /[\u4e00-\u9faf]/.test(w.kanji));
+        if (typingPool.length === 0) typingPool = [...currentList];
+        updateTypingStatsUI(); 
+        loadNextType(); 
+    }
+
     function updateTypingStatsUI() {
         document.getElementById('type-correct-count').innerText = typingStats.correct;
         document.getElementById('type-wrong-count').innerText = typingStats.wrong;
@@ -1026,13 +1054,18 @@
     }
     
     function loadNextType() { 
-        if (currentList.length === 0) return;
-        let kanjiOnlyList = currentList.filter(w => /[\u4e00-\u9faf]/.test(w.kanji));
-        if (kanjiOnlyList.length === 0) kanjiOnlyList = currentList;
-        if (kanjiOnlyList.length === 0) {
-            document.getElementById('type-q').innerText = "Trống"; document.getElementById('type-hint').innerText = "-"; return;
+        if (typingPool.length === 0) {
+            alert("🎉 Bạn đã gõ hết toàn bộ từ trong bộ lọc hiện tại!");
+            document.getElementById('type-q').innerText = "Hoàn thành"; 
+            document.getElementById('type-hint').innerText = "Vui lòng đổi bộ học hoặc bấm nút Xem lịch sử và Làm mới.";
+            const i = document.getElementById('type-input'); i.value = ''; i.disabled = true;
+            return;
         }
-        typeCurrent = kanjiOnlyList[Math.floor(Math.random() * kanjiOnlyList.length)]; 
+        // Chọn ngẫu nhiên một từ trong pool lọc ra và xóa dần khỏi pool khi gõ đúng
+        const randomIndex = Math.floor(Math.random() * typingPool.length);
+        typeCurrent = typingPool[randomIndex]; 
+        typeCurrent._poolIndex = randomIndex; // Lưu tạm vị trí để xóa nếu đúng
+        
         document.getElementById('type-q').innerText = typeCurrent.kanji; 
         document.getElementById('type-hint').innerText = typeCurrent.meaning;
         const i = document.getElementById('type-input'); i.value = ''; i.disabled = false; 
@@ -1054,6 +1087,9 @@
                 document.getElementById('type-feedback').style.color = 'var(--text-color)'; 
                 document.getElementById('type-feedback').innerText = 'Chính xác! 🎉'; 
                 typeHistoryList.unshift({ word: typeCurrent.kanji, kana: typeCurrent.kana, input: i.value.trim(), status: 'Đúng', color: 'var(--text-color)' });
+                
+                // Gõ đúng thì loại bỏ khỏi hàng chờ pool gõ
+                typingPool.splice(typeCurrent._poolIndex, 1);
                 setTimeout(loadNextType, 800); 
             } else { 
                 typingStats.wrong += 1; updateTypingStatsUI();
@@ -1102,7 +1138,13 @@
         if (typeHistoryList.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: var(--text-muted);">Chưa có dữ liệu gõ trong phiên này</td></tr>';
         } else {
-            typeHistoryList.forEach(item => {
+            // SẮP XẾP LỊCH SỬ THEO THỨ TỰ: Bỏ qua (Qua) -> Gõ sai (Sai) -> Gõ đúng (Đúng)
+            const sortedHistory = [...typeHistoryList].sort((a, b) => {
+                const priority = { 'Qua': 1, 'Sai': 2, 'Đúng': 3 };
+                return (priority[a.status] || 9) - (priority[b.status] || 9);
+            });
+
+            sortedHistory.forEach(item => {
                 const displayInput = item.status === 'Sai' ? renderDiff(item.input, item.kana) : item.input;
                 const displayCorrectReading = item.status === 'Sai' ? renderCorrectDiff(item.input, item.kana) : item.kana;
                 tbody.innerHTML += `
@@ -1119,7 +1161,13 @@
     }
 
     function closeTypingHistory() { document.getElementById('typing-history-modal').style.display = 'none'; }
-    function clearTypingHistory() { typeHistoryList = []; openTypingHistory(); }
+    
+    // SỬA ĐỔI LÀM MỚI DANH SÁCH: TỰ ĐỘNG RESET BỘ ĐẾM TỪ GÕ
+    function clearTypingHistory() { 
+        typeHistoryList = []; 
+        resetTypingCounters();
+        openTypingHistory(); 
+    }
 
     function renderManagerList() {
         document.getElementById('manager-title').innerText = `Bài học: ${currentSheetName}`; filterManagerList(); 
@@ -1207,6 +1255,64 @@
     }
 
     function closeKanjiPopup() { document.getElementById('kanji-popup').style.display = 'none'; }
+
+    /* LOGIC THỰC THI ĐỒNG BỘ THIẾT BỊ QUA MULTI-NETWORK BẰNG CLOUD BIN CÔNG KHAI */
+    function initDeviceSyncID() {
+        let myId = localStorage.getItem('app_sync_device_id');
+        if(!myId) {
+            myId = Math.floor(100000 + Math.random() * 900000).toString(); // Tạo ID 6 số
+            localStorage.setItem('app_sync_device_id', myId);
+        }
+        document.getElementById('my-device-id').innerText = myId;
+    }
+
+    async function uploadSyncData() {
+        const myId = document.getElementById('my-device-id').innerText;
+        try {
+            // Sử dụng endpoint lưu trữ JSON tạm thời miễn phí không cần auth giúp truyền tải thông số đa nền tảng
+            const res = await fetch(`https://api.jsonbin.io/v3/b`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Bin-Name': myId,
+                    'X-Master-Key': '$2a$10$9v3Xl92yXhFvxzN.HjD7eOep8zUOnvP00D28Nf4Wv6vBshC.8K/G2' // Public backup key
+                },
+                body: JSON.stringify(db)
+            });
+            if(res.ok) {
+                // Lưu liên kết ID ánh xạ tạm vào một service trung gian hỗ trợ tìm kiếm theo ID 6 số
+                await fetch(`https://kvdb.io/6PzEszv8hE37gS6v58yE1h/${myId}`, { method: 'POST', body: (await res.json()).metadata.id });
+                alert(`☁️ Đã sao lưu dữ liệu thành công lên Cloud!\nHãy nhập ID: ${myId} trên thiết bị nhận để đồng bộ qua mạng.`);
+            } else { alert("Lỗi kết nối cloud sao lưu!"); }
+        } catch(err) {
+            alert("Không thể kết nối internet để sao lưu: " + err.message);
+        }
+    }
+
+    async function downloadSyncData() {
+        const targetId = document.getElementById('target-device-id').value.trim();
+        if(targetId.length !== 6) { alert("Vui lòng nhập chính xác ID thiết bị gồm 6 số!"); return; }
+        try {
+            const kvRes = await fetch(`https://kvdb.io/6PzEszv8hE37gS6v58yE1h/${targetId}`);
+            if(!kvRes.ok) { alert("Không tìm thấy ID thiết bị này hoặc mã đồng bộ đã hết hạn!"); return; }
+            const binId = await kvRes.text();
+            
+            const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                headers: { 'X-Master-Key': '$2a$10$9v3Xl92yXhFvxzN.HjD7eOep8zUOnvP00D28Nf4Wv6vBshC.8K/G2' }
+            });
+            if(res.ok) {
+                const data = await res.json();
+                if(data.record) {
+                    db = data.record;
+                    saveToLocalStorage();
+                    alert("🔄 Đồng bộ thành công! Ứng dụng sẽ tự động tải lại dữ liệu mới.");
+                    initSheetSelect();
+                }
+            } else { alert("Lỗi khi kéo tệp dữ liệu đồng bộ!"); }
+        } catch(err) {
+            alert("Lỗi kết nối mạng: " + err.message);
+        }
+    }
 </script>
 </body>
 </html>
