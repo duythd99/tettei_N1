@@ -17,6 +17,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
 
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <!-- CDN các thư viện bổ sung: PeerJS đóng vai trò truyền dẫn, QRCode sinh mã kết nối nhanh -->
+    <script src="https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         :root[data-theme="light"] {
             --bg-color: #F0F7FF;
@@ -198,6 +201,7 @@
 
         .blur-box { filter: blur(6px); background: var(--blur-bg); border-radius: 4px; padding: 2px 8px; cursor: pointer; color: transparent; display: inline-block; transition: filter 0.25s; user-select: none; }
         .blur-box.revealed { filter: none; background: transparent; color: inherit; user-select: text; }
+        #type-hint.revealed { color: var(--primary); }
 
         mark.highlight-word { background-color: var(--highlight-bg); color: var(--highlight-text); font-weight: bold; padding: 0 2px; border-radius: 4px; }
 
@@ -282,11 +286,6 @@
         .color-picker-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; text-align: left; font-size: 12px; }
         .picker-item { display: flex; flex-direction: column; gap: 2px; }
         .picker-item input { width: 100%; height: 30px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; background: transparent; }
-
-        /* CSS ĐỒNG BỘ THIẾT BỊ */
-        .sync-section { margin-top: 6px; padding: 10px; background-color: var(--card-bg); border: 1.5px solid var(--border-color); border-radius: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 6px; }
-        .sync-row { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
-        .sync-input { flex: 1; padding: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); border-radius: 6px; font-size: 12px; text-align: center; font-weight: bold; outline: none; }
     </style>
 </head>
 <body>
@@ -386,18 +385,6 @@
             <button id="btn-diff-easy" class="diff-btn diff-easy" onclick="handleDifficulty('easy', event)"><span class="diff-icon">Dễ</span><span id="badge-easy">0</span></button>
         </div>
 
-        <!-- BỔ SUNG CHỨC NĂNG ĐỒNG BỘ THIẾT BỊ QUA ID 6 SỐ -->
-        <div class="sync-section">
-            <div class="sync-row">
-                <span style="font-weight: bold;">ID của bạn: <span id="my-device-id" style="color: var(--primary);">------</span></span>
-                <button class="file-input-label" style="padding: 2px 6px;" onclick="uploadSyncData()">Cloud Sao lưu ☁️</button>
-            </div>
-            <div class="sync-row">
-                <input type="number" id="target-device-id" class="sync-input" placeholder="Nhập ID 6 số thiết bị khác...">
-                <button class="file-input-label" style="padding: 4px 8px;" onclick="downloadSyncData()">Đồng bộ kết nối 🔄</button>
-            </div>
-        </div>
-
         <footer>
             <a id="fc-gemini" href="#" target="_blank">🔍 Tra Gemini</a>
             <span style="color:var(--border-color)">|</span>
@@ -426,7 +413,7 @@
             <div class="quiz-question" id="type-q">-</div>
             <div class="quiz-hint-wrapper">
                 Gợi ý ý nghĩa:
-                <span id="type-hint" class="quiz-hint-text">-</span>
+                <span id="type-hint" class="quiz-hint-text blur-box" onclick="revealBlur(event, this)">-</span>
             </div>
             
             <input type="text" id="type-input" class="game-input" placeholder="Nhập cách đọc Hiragana/Kana..." onkeydown="checkTyping(event)" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
@@ -489,7 +476,7 @@
 <div id="typing-history-modal" class="modal-overlay" onclick="closeTypingHistory()">
     <div class="modal-content" onclick="event.stopPropagation()" style="max-height: 75vh; display: flex; flex-direction: column; width: 90%; max-width: 400px; padding: 16px;">
         <span class="modal-close" onclick="closeTypingHistory()">&times;</span>
-        <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--text-color); font-size: 16px;">Lịch sử gõ từ</h3>
+        <h3 style="margin-top: 0; margin-bottom: 10px; color: var(--text-color); font-size: 16px;"> Lịch sử gõ từ</h3>
         <div style="flex: 1; overflow-y: auto; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-color);">
             <table style="width: 100%; border-collapse: collapse; font-size: 13px; text-align: left;">
                 <thead style="position: sticky; top: 0; background: var(--blur-bg); z-index: 10;">
@@ -547,6 +534,36 @@
     </div>
 </div>
 
+<!-- ================= PHÂN HỆ ĐỒNG BỘ TIẾN ĐỘ CHUYỂN VÙNG (NÂNG CẤP ĐỒNG BỘ MẠNG CHÉO) ================= -->
+<!-- Nút nổi để mở bảng điều khiển đồng bộ -->
+<button id="sync-fab" style="position: fixed; bottom: 20px; right: 20px; z-index: 1999; background-color: var(--primary); color: white; border: none; border-radius: 50%; width: 44px; height: 44px; font-size: 20px; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center;" title="Đồng bộ giữa Laptop và Điện thoại">🔄</button>
+
+<!-- Giao diện hộp thoại Đồng bộ thiết bị -->
+<div id="sync-modal" class="modal-overlay" onclick="closeSyncModal()">
+    <div class="modal-content" onclick="event.stopPropagation()" style="max-width: 350px; padding: 20px 16px;">
+        <span class="modal-close" onclick="closeSyncModal()">&times;</span>
+        <h3 style="color: var(--primary); margin-top: 0; margin-bottom: 6px; font-size: 18px;">Đồng Bộ Thiết Bị 🔄</h3>
+        <p style="font-size: 12px; color: var(--text-muted); margin: 0 0 12px 0; line-height: 1.3;">Hợp nhất tiến độ học tập. Có thể kết nối qua Bluetooth, 4G, hoặc các mạng Wifi khác nhau.</p>
+        
+        <div style="margin: 12px 0; text-align: left;">
+            <span style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-color);">Mã số 6 chữ số của thiết bị này:</span>
+            <div id="sync-my-id" style="background: var(--bg-color); color: var(--text-color); padding: 8px; border-radius: 8px; font-family: monospace; font-weight: bold; border: 1px dashed var(--border-color); text-align: center; font-size: 18px; letter-spacing: 2px;">------</div>
+        </div>
+        
+        <div id="sync-qrcode-container" style="display: flex; justify-content: center; margin: 12px 0; background: white; padding: 8px; border-radius: 8px; width: fit-content; margin-left: auto; margin-right: auto; box-shadow: 0 2px 6px rgba(0,0,0,0.15);"></div>
+        
+        <hr class="modal-divider" style="margin: 12px 0;">
+        
+        <div style="margin: 12px 0; text-align: left;">
+            <label style="font-size: 12px; font-weight: bold; display: block; margin-bottom: 4px; color: var(--text-color);">Nhập mã số thiết bị đối phương:</label>
+            <input type="text" id="sync-remote-id" class="game-input" style="font-size: 15px; padding: 8px; height: auto; font-family: monospace; letter-spacing: 1px;" placeholder="Nhập mã 6 số của máy kia..." maxlength="6">
+        </div>
+        
+        <button id="sync-action-btn" class="nav-btn btn-prev" style="width: 100%; padding: 10px; font-size: 13px;" onclick="connectToPeer()">Kết nối & Trộn dữ liệu</button>
+        <p id="sync-status-text" style="font-size: 12px; margin: 8px 0 0 0; font-weight: bold; color: var(--accent); min-height: 15px;"></p>
+    </div>
+</div>
+
 <script>
     if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
@@ -554,7 +571,7 @@
         });
     }
 
-    // TỐI ƯU HÓA TRÊN IPHONE
+    // TỐI ƯU HÓA TRÊN IPHONE: Khắc phục triệt để cuộn và tự động tính toán viewport dvh khớp màn hình tai thỏ/dynamic island
     window.addEventListener('pageshow', (event) => {
         window.scrollTo(0, 0);
         document.body.style.height = window.innerHeight + 'px';
@@ -596,12 +613,13 @@
     let typingStats = { correct: 0, wrong: 0, total: 0 };
     let typeHistoryList = []; 
     let currentUtterance = null; 
-    let typingPool = []; // Danh sách từ được lọc riêng cho chế độ gõ
+
+    // Các biến hỗ trợ chế độ gõ ngẫu nhiên không trùng lặp
+    let typingPool = []; 
 
     window.onload = () => { 
         updateThemeToggleIcon();
         initSheetSelect(); 
-        initDeviceSyncID();
     };
 
     function toggleTheme() {
@@ -856,7 +874,9 @@
         updateFlashcard(); 
         filterManagerList();
         updateDifficultyCounters();
-        resetTypingCounters(); // Cập nhật bộ lọc tương ứng cho phần gõ từ
+
+        // Cập nhật bộ lọc mức độ áp dụng cho cả Tab Gõ Từ
+        resetTypingCounters();
     }
 
     function saveToLocalStorage() { 
@@ -1008,7 +1028,16 @@
     function prevCard() { if(currentList.length === 0) return; if(activeWordIndex > 0) activeWordIndex--; else activeWordIndex = currentList.length - 1; updateFlashcard(); }
     function shuffleCards() { if(currentList.length === 0) return; currentList.sort(() => Math.random() - 0.5); activeWordIndex = 0; updateFlashcard(); }
     
-    function toggleStar(e) { e.stopPropagation(); if(!currentList[activeWordIndex]) return; currentList[activeWordIndex].starred = !currentList[activeWordIndex].starred; saveToLocalStorage(); updateStarUI(); }
+    // Đồng bộ chức năng yêu thích giữa danh sách và trạng thái ứng dụng
+    function toggleStar(e) { 
+        e.stopPropagation(); 
+        if(!currentList[activeWordIndex]) return; 
+        currentList[activeWordIndex].starred = !currentList[activeWordIndex].starred; 
+        saveToLocalStorage(); 
+        updateStarUI(); 
+        resetTypingCounters();
+    }
+    
     function updateStarUI() {
         const word = currentList[activeWordIndex]; if(!word) return;
         document.querySelectorAll('.star-icon').forEach(el => { 
@@ -1040,9 +1069,14 @@
     let typeCurrent = null;
     function resetTypingCounters() { 
         typingStats = { correct: 0, wrong: 0, total: 0 }; 
-        // Tạo pool từ vựng đã lọc dựa trên bộ lọc áp dụng của `currentList`
-        typingPool = currentList.filter(w => /[\u4e00-\u9faf]/.test(w.kanji));
-        if (typingPool.length === 0) typingPool = [...currentList];
+        
+        // Tạo pool từ vựng ngẫu nhiên không trùng lặp dựa theo mảng currentList đã được lọc qua bộ lọc mức độ học tập và dấu sao
+        let candidates = currentList.filter(w => /[\u4e00-\u9faf]/.test(w.kanji));
+        if (candidates.length === 0) candidates = [...currentList];
+        
+        // Xáo trộn ngẫu nhiên toàn bộ pool
+        typingPool = [...candidates].sort(() => Math.random() - 0.5);
+        
         updateTypingStatsUI(); 
         loadNextType(); 
     }
@@ -1055,19 +1089,25 @@
     
     function loadNextType() { 
         if (typingPool.length === 0) {
-            alert("🎉 Bạn đã gõ hết toàn bộ từ trong bộ lọc hiện tại!");
-            document.getElementById('type-q').innerText = "Hoàn thành"; 
-            document.getElementById('type-hint').innerText = "Vui lòng đổi bộ học hoặc bấm nút Xem lịch sử và Làm mới.";
-            const i = document.getElementById('type-input'); i.value = ''; i.disabled = true;
+            document.getElementById('type-q').innerText = "Hoàn thành!"; 
+            document.getElementById('type-hint').innerText = "Đã gõ hết toàn bộ từ vựng!";
+            document.getElementById('type-hint').classList.add('revealed');
+            const i = document.getElementById('type-input');
+            i.value = ''; i.disabled = true;
+            document.getElementById('type-feedback').innerText = 'Hãy xem lịch sử gõ hoặc làm mới!';
+            
+            // Xuất hiện thông báo khi hoàn thành và tự động mở lịch sử gõ từ
+            alert("Chúc mừng! Bạn đã hoàn thành việc gõ toàn bộ từ vựng trong danh sách lọc.");
+            openTypingHistory();
             return;
         }
-        // Chọn ngẫu nhiên một từ trong pool lọc ra và xóa dần khỏi pool khi gõ đúng
-        const randomIndex = Math.floor(Math.random() * typingPool.length);
-        typeCurrent = typingPool[randomIndex]; 
-        typeCurrent._poolIndex = randomIndex; // Lưu tạm vị trí để xóa nếu đúng
+        
+        // Lấy từ tiếp theo ra khỏi pool ngẫu nhiên đã xáo trộn
+        typeCurrent = typingPool.pop(); 
         
         document.getElementById('type-q').innerText = typeCurrent.kanji; 
         document.getElementById('type-hint').innerText = typeCurrent.meaning;
+        document.getElementById('type-hint').classList.remove('revealed');
         const i = document.getElementById('type-input'); i.value = ''; i.disabled = false; 
         document.getElementById('type-feedback').innerText = ''; i.focus(); 
     }
@@ -1082,14 +1122,13 @@
             i.disabled = true; 
             typingStats.total += 1;
 
+            document.getElementById('type-hint').classList.add('revealed');
+
             if (v === typeCurrent.kana.toLowerCase()) { 
                 typingStats.correct += 1; updateTypingStatsUI();
                 document.getElementById('type-feedback').style.color = 'var(--text-color)'; 
                 document.getElementById('type-feedback').innerText = 'Chính xác! 🎉'; 
                 typeHistoryList.unshift({ word: typeCurrent.kanji, kana: typeCurrent.kana, input: i.value.trim(), status: 'Đúng', color: 'var(--text-color)' });
-                
-                // Gõ đúng thì loại bỏ khỏi hàng chờ pool gõ
-                typingPool.splice(typeCurrent._poolIndex, 1);
                 setTimeout(loadNextType, 800); 
             } else { 
                 typingStats.wrong += 1; updateTypingStatsUI();
@@ -1106,6 +1145,7 @@
         typingStats.total += 1; typingStats.wrong += 1; updateTypingStatsUI();
         document.getElementById('type-feedback').style.color = 'var(--text-muted)';
         document.getElementById('type-feedback').innerText = `Đáp án đúng: ${typeCurrent.kana}`;
+        document.getElementById('type-hint').classList.add('revealed');
         document.getElementById('type-input').disabled = true;
         typeHistoryList.unshift({ word: typeCurrent.kanji, kana: typeCurrent.kana, input: '(Bỏ qua)', status: 'Qua', color: 'var(--text-muted)' });
         setTimeout(loadNextType, 1200);
@@ -1138,22 +1178,29 @@
         if (typeHistoryList.length === 0) {
             tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding: 20px; color: var(--text-muted);">Chưa có dữ liệu gõ trong phiên này</td></tr>';
         } else {
-            // SẮP XẾP LỊCH SỬ THEO THỨ TỰ: Bỏ qua (Qua) -> Gõ sai (Sai) -> Gõ đúng (Đúng)
+            // Sắp xếp lịch sử gõ theo thứ tự ưu tiên: Qua (Bỏ qua) -> Sai -> Đúng
             const sortedHistory = [...typeHistoryList].sort((a, b) => {
                 const priority = { 'Qua': 1, 'Sai': 2, 'Đúng': 3 };
-                return (priority[a.status] || 9) - (priority[b.status] || 9);
+                return (priority[a.status] || 99) - (priority[b.status] || 99);
             });
 
             sortedHistory.forEach(item => {
                 const displayInput = item.status === 'Sai' ? renderDiff(item.input, item.kana) : item.input;
                 const displayCorrectReading = item.status === 'Sai' ? renderCorrectDiff(item.input, item.kana) : item.kana;
+                
+                // Gán nhãn và style thân thiện cho cột kết quả
+                let statusLabel = item.status;
+                if (item.status === 'Qua') statusLabel = '<span style="color: var(--text-muted);">Bỏ qua</span>';
+                else if (item.status === 'Sai') statusLabel = '<span style="color: var(--error);">Gõ sai</span>';
+                else if (item.status === 'Đúng') statusLabel = '<span style="color: var(--success);">Gõ đúng</span>';
+
                 tbody.innerHTML += `
                     <tr>
                         <td style="padding: 8px; border-bottom: 1px dashed var(--border-color);">
                             <strong>${item.word}</strong><br><small style="color:var(--text-muted)">${displayCorrectReading}</small>
                         </td>
                         <td style="padding: 8px; border-bottom: 1px dashed var(--border-color);">${displayInput}</td>
-                        <td style="padding: 8px; border-bottom: 1px dashed var(--border-color); font-weight: bold;">${item.status}</td>
+                        <td style="padding: 8px; border-bottom: 1px dashed var(--border-color); font-weight: bold;">${statusLabel}</td>
                     </tr>`;
             });
         }
@@ -1162,7 +1209,7 @@
 
     function closeTypingHistory() { document.getElementById('typing-history-modal').style.display = 'none'; }
     
-    // SỬA ĐỔI LÀM MỚI DANH SÁCH: TỰ ĐỘNG RESET BỘ ĐẾM TỪ GÕ
+    // Reset lịch sử gõ từ, đồng thời reset bộ đếm số câu và tải lại pool ngẫu nhiên mới
     function clearTypingHistory() { 
         typeHistoryList = []; 
         resetTypingCounters();
@@ -1255,62 +1302,191 @@
     }
 
     function closeKanjiPopup() { document.getElementById('kanji-popup').style.display = 'none'; }
+</script>
+<script>
+    let syncPeer = null;
+    let syncConn = null;
 
-    /* LOGIC THỰC THI ĐỒNG BỘ THIẾT BỊ QUA MULTI-NETWORK BẰNG CLOUD BIN CÔNG KHAI */
-    function initDeviceSyncID() {
-        let myId = localStorage.getItem('app_sync_device_id');
-        if(!myId) {
-            myId = Math.floor(100000 + Math.random() * 900000).toString(); // Tạo ID 6 số
-            localStorage.setItem('app_sync_device_id', myId);
-        }
-        document.getElementById('my-device-id').innerText = myId;
-    }
+    document.getElementById('sync-fab').addEventListener('click', openSyncModal);
 
-    async function uploadSyncData() {
-        const myId = document.getElementById('my-device-id').innerText;
-        try {
-            // Sử dụng endpoint lưu trữ JSON tạm thời miễn phí không cần auth giúp truyền tải thông số đa nền tảng
-            const res = await fetch(`https://api.jsonbin.io/v3/b`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Bin-Name': myId,
-                    'X-Master-Key': '$2a$10$9v3Xl92yXhFvxzN.HjD7eOep8zUOnvP00D28Nf4Wv6vBshC.8K/G2' // Public backup key
-                },
-                body: JSON.stringify(db)
-            });
-            if(res.ok) {
-                // Lưu liên kết ID ánh xạ tạm vào một service trung gian hỗ trợ tìm kiếm theo ID 6 số
-                await fetch(`https://kvdb.io/6PzEszv8hE37gS6v58yE1h/${myId}`, { method: 'POST', body: (await res.json()).metadata.id });
-                alert(`☁️ Đã sao lưu dữ liệu thành công lên Cloud!\nHãy nhập ID: ${myId} trên thiết bị nhận để đồng bộ qua mạng.`);
-            } else { alert("Lỗi kết nối cloud sao lưu!"); }
-        } catch(err) {
-            alert("Không thể kết nối internet để sao lưu: " + err.message);
+    function openSyncModal() {
+        document.getElementById('sync-modal').style.display = 'flex';
+        if (!syncPeer) {
+            initSyncPeer();
         }
     }
 
-    async function downloadSyncData() {
-        const targetId = document.getElementById('target-device-id').value.trim();
-        if(targetId.length !== 6) { alert("Vui lòng nhập chính xác ID thiết bị gồm 6 số!"); return; }
-        try {
-            const kvRes = await fetch(`https://kvdb.io/6PzEszv8hE37gS6v58yE1h/${targetId}`);
-            if(!kvRes.ok) { alert("Không tìm thấy ID thiết bị này hoặc mã đồng bộ đã hết hạn!"); return; }
-            const binId = await kvRes.text();
+    function closeSyncModal() {
+        document.getElementById('sync-modal').style.display = 'none';
+    }
+
+    function initSyncPeer() {
+        const statusText = document.getElementById('sync-status-text');
+        statusText.innerText = "Đang cấp mã định danh ngắn...";
+        
+        // Sinh ngẫu nhiên mã 6 chữ số (từ 100000 đến 999999)
+        const shortId = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Kết nối thông qua broker đám mây của PeerJS hỗ trợ định tuyến kết nối mạng chéo NAT (Mạng khác nhau)
+        syncPeer = new Peer(shortId);
+        
+        syncPeer.on('open', function(id) {
+            document.getElementById('sync-my-id').innerText = id;
+            statusText.innerText = "Sẵn sàng liên kết mạng chéo!";
             
-            const res = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-                headers: { 'X-Master-Key': '$2a$10$9v3Xl92yXhFvxzN.HjD7eOep8zUOnvP00D28Nf4Wv6vBshC.8K/G2' }
+            const qrContainer = document.getElementById('sync-qrcode-container');
+            qrContainer.innerHTML = "";
+            new QRCode(qrContainer, {
+                text: id,
+                width: 110,
+                height: 110,
+                colorDark : "#000000",
+                colorLight : "#ffffff"
             });
-            if(res.ok) {
-                const data = await res.json();
-                if(data.record) {
-                    db = data.record;
-                    saveToLocalStorage();
-                    alert("🔄 Đồng bộ thành công! Ứng dụng sẽ tự động tải lại dữ liệu mới.");
-                    initSheetSelect();
+        });
+        
+        syncPeer.on('connection', function(conn) {
+            syncConn = conn;
+            setupConnectionListeners(false);
+        });
+        
+        syncPeer.on('error', function(err) {
+            // Trường hợp mã số 6 chữ số bị trùng lặp trên cụm Cloud toàn cầu, tiến hành sinh tự động lại mã khác
+            if (err.type === 'unavailable-id') {
+                console.log("Mã số trùng lặp trên hệ thống tín hiệu, đang tạo mã mới...");
+                initSyncPeer();
+            } else {
+                statusText.innerText = "Lỗi kết nối: " + err.type;
+                console.error(err);
+            }
+        });
+    }
+
+    function connectToPeer() {
+        const remoteId = document.getElementById('sync-remote-id').value.trim();
+        const statusText = document.getElementById('sync-status-text');
+        if (!remoteId || remoteId.length < 4) {
+            alert("Vui lòng nhập đúng mã số kết nối (4 đến 6 chữ số)!");
+            return;
+        }
+        statusText.innerText = "Đang bắt tay kết nối toàn cầu P2P...";
+        syncConn = syncPeer.connect(remoteId);
+        setupConnectionListeners(true);
+    }
+
+    function setupConnectionListeners(isInitiator) {
+        const statusText = document.getElementById('sync-status-text');
+        
+        syncConn.on('open', function() {
+            statusText.innerText = "Liên kết thành công! Đang trao đổi gói dữ liệu...";
+            if (isInitiator) {
+                const localData = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    localData[k] = localStorage.getItem(k);
                 }
-            } else { alert("Lỗi khi kéo tệp dữ liệu đồng bộ!"); }
-        } catch(err) {
-            alert("Lỗi kết nối mạng: " + err.message);
+                syncConn.send({ type: 'SYNC_REQUEST', payload: localData });
+            }
+        });
+        
+        syncConn.on('data', function(data) {
+            if (!data) return;
+            
+            if (data.type === 'SYNC_REQUEST') {
+                statusText.innerText = "Đang xử lý hợp nhất tiến trình...";
+                
+                const localDataBeforeMerge = {};
+                for (let i = 0; i < localStorage.length; i++) {
+                    const k = localStorage.key(i);
+                    localDataBeforeMerge[k] = localStorage.getItem(k);
+                }
+                
+                executeSmartMerge(data.payload);
+                
+                syncConn.send({ type: 'SYNC_RESPONSE', payload: localDataBeforeMerge });
+                
+                statusText.innerText = "Đồng bộ thành công! Đang làm mới ứng dụng...";
+                setTimeout(() => { window.location.reload(); }, 1200);
+            }
+            
+            if (data.type === 'SYNC_RESPONSE') {
+                statusText.innerText = "Đang thực thi cấu trúc phản hồi...";
+                executeSmartMerge(data.payload);
+                statusText.innerText = "Đồng bộ thành công! Đang làm mới ứng dụng...";
+                setTimeout(() => { window.location.reload(); }, 1200);
+            }
+        });
+        
+        syncConn.on('close', function() {
+            statusText.innerText = "Đường truyền tín hiệu đã ngắt.";
+        });
+    }
+
+    function executeSmartMerge(incomingStorage) {
+        try {
+            if (!incomingStorage) return;
+            
+            if (incomingStorage['app_theme'] && !localStorage.getItem('app_theme')) {
+                localStorage.setItem('app_theme', incomingStorage['app_theme']);
+            }
+            
+            let incomingDbRaw = incomingStorage['jlpt_kanji_db'];
+            if (!incomingDbRaw) return;
+            
+            let incomingDb = JSON.parse(incomingDbRaw);
+            let currentDb = JSON.parse(localStorage.getItem('jlpt_kanji_db')) || {};
+            
+            for (const sheet in incomingDb) {
+                if (sheet === '_amHanViol') continue; // Bỏ qua nếu là key lỗi định dạng cũ
+                if (sheet === '_amHanViet') {
+                    if (!currentDb['_amHanViet']) currentDb['_amHanViet'] = {};
+                    Object.assign(currentDb['_amHanViet'], incomingDb['_amHanViet']);
+                    continue;
+                }
+                
+                if (!currentDb[sheet]) {
+                    currentDb[sheet] = incomingDb[sheet];
+                    continue;
+                }
+                
+                const localArr = currentDb[sheet];
+                const remoteArr = incomingDb[sheet];
+                
+                remoteArr.forEach(remoteWord => {
+                    const localWord = localArr.find(w => w.kanji === remoteWord.kanji);
+                    if (localWord) {
+                        // Trộn thông minh: Ưu tiên thiết bị có lượt xem (flipCount) nhiều hơn hoặc có phân loại mức độ học tập tốt hơn
+                        if ((remoteWord.flipCount || 0) > (localWord.flipCount || 0)) {
+                            localWord.flipCount = remoteWord.flipCount;
+                        }
+                        if (remoteWord.starred) {
+                            localWord.starred = true;
+                        }
+                        if (remoteWord.difficulty && !localWord.difficulty) {
+                            localWord.difficulty = remoteWord.difficulty;
+                            localWord.repetition = remoteWord.repetition;
+                            localWord.interval = remoteWord.interval;
+                            localWord.efactor = remoteWord.efactor;
+                            localWord.nextReview = remoteWord.nextReview;
+                        } else if (remoteWord.difficulty && localWord.difficulty) {
+                            // Nếu cả 2 cùng phân loại, ưu tiên dữ liệu có thời điểm ôn tập muộn hơn (mới học sâu hơn)
+                            if ((remoteWord.nextReview || 0) > (localWord.nextReview || 0)) {
+                                localWord.difficulty = remoteWord.difficulty;
+                                localWord.repetition = remoteWord.repetition;
+                                localWord.interval = remoteWord.interval;
+                                localWord.efactor = remoteWord.efactor;
+                                localWord.nextReview = remoteWord.nextReview;
+                            }
+                        }
+                    } else {
+                        localArr.push(remoteWord);
+                    }
+                });
+            }
+            
+            localStorage.setItem('jlpt_kanji_db', JSON.stringify(currentDb));
+        } catch (err) {
+            console.error("Lỗi đồng bộ trộn dữ liệu hệ thống:", err);
         }
     }
 </script>
