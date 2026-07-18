@@ -1347,8 +1347,22 @@
         // Sinh ngẫu nhiên mã 6 chữ số (từ 100000 đến 999999)
         const shortId = Math.floor(100000 + Math.random() * 900000).toString();
         
-        // Kết nối thông qua broker đám mây của PeerJS hỗ trợ định tuyến kết nối mạng chéo NAT (Mạng khác nhau)
-        syncPeer = new Peer(shortId);
+        // CẢI TIẾN: Bổ sung cấu hình STUN servers của Google giúp đục lỗ NAT (NAT Traversal) vượt tường lửa cách ly của Hotspot phát từ điện thoại.
+        const peerConfig = {
+            config: {
+                iceServers: [
+                    { urls: 'stun:stun.l.google.com:19302' },
+                    { urls: 'stun:stun1.l.google.com:19302' },
+                    { urls: 'stun:stun2.l.google.com:19302' },
+                    { urls: 'stun:stun3.l.google.com:19302' },
+                    { urls: 'stun:stun4.l.google.com:19302' }
+                ],
+                sdpSemantics: 'unified-plan'
+            }
+        };
+
+        // Kết nối thông qua broker đám mây của PeerJS kèm cấu hình STUN định tuyến mạng chéo
+        syncPeer = new Peer(shortId, peerConfig);
         
         syncPeer.on('open', function(id) {
             document.getElementById('sync-my-id').innerText = id;
@@ -1390,7 +1404,14 @@
             return;
         }
         statusText.innerText = "Đang bắt tay kết nối toàn cầu P2P...";
-        syncConn = syncPeer.connect(remoteId);
+        
+        // CẢI TIẾN: Thiết lập cấu hình connection option ổn định hơn cho môi trường mạng bị nghẽn cục bộ
+        syncConn = syncPeer.connect(remoteId, {
+            reliable: true,
+            connectionOptions: {
+                freezeWithRender: true
+            }
+        });
         setupConnectionListeners(true);
     }
 
