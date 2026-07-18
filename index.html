@@ -416,13 +416,15 @@
                 <span id="type-hint" class="quiz-hint-text blur-box" onclick="revealBlur(event, this)">-</span>
             </div>
             
+            <!-- ĐÃ CẬP NHẬT: Hiện đáp án khi sai/bỏ qua lên TRÊN ô nhập, PHÍA DƯỚI gợi ý ý nghĩa -->
+            <p id="type-feedback" style="text-align:center; font-weight:bold; font-size:13px; height:18px; margin: 0;"></p>
+            
             <input type="text" id="type-input" class="game-input" placeholder="Nhập cách đọc Hiragana/Kana..." onkeydown="checkTyping(event)" autocomplete="off" autocorrect="off" autocapitalize="none" spellcheck="false">
             
             <div class="type-actions">
                 <button id="type-skip-btn" class="mode-btn" style="width: 100%; padding: 10px; border-radius: 10px;" onclick="skipTyping()">Bỏ qua / Câu khác</button>
                 <button class="mode-btn" style="width: 100%; padding: 10px; border-radius: 10px; margin-top: 2px;" onclick="openTypingHistory()">📝 Xem lịch sử gõ</button>
             </div>
-            <p id="type-feedback" style="text-align:center; font-weight:bold; font-size:13px; height:18px; margin: 0;"></p>
         </div>
         <footer>
             <span style="opacity: 0.5; font-size: 11px;">徹底 N1 - Phiên bản Typing</span>
@@ -795,7 +797,25 @@
                 });
 
                 if (Object.keys(newDb).filter(k => k !== '_amHanViet').length > 0) {
-                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp thành công!"); initSheetSelect();
+                    // Logic trộn bảo lưu tiến độ cũ (dấu sao, mức độ, lượt xem...)
+                    const oldDb = db;
+                    for (const sheetName in newDb) {
+                        if (sheetName === '_amHanViet') continue;
+                        if (oldDb[sheetName]) {
+                            newDb[sheetName].forEach(newWord => {
+                                const matchedOld = oldDb[sheetName].find(o => o.kanji === newWord.kanji);
+                                if (matchedOld) {
+                                    newWord.starred = matchedOld.starred !== undefined ? matchedOld.starred : false;
+                                    newWord.flipCount = matchedOld.flipCount !== undefined ? matchedOld.flipCount : 0;
+                                    newWord.difficulty = matchedOld.difficulty !== undefined ? matchedOld.difficulty : "unlearned";
+                                    newWord.interval = matchedOld.interval !== undefined ? matchedOld.interval : 0;
+                                    newWord.ease = matchedOld.ease !== undefined ? matchedOld.ease : 2.5;
+                                    newWord.nextReview = matchedOld.nextReview !== undefined ? matchedOld.nextReview : 0;
+                                }
+                            });
+                        }
+                    }
+                    db = newDb; saveToLocalStorage(); alert("📥 Data đã được nạp và cập nhật thành công (Giữ nguyên tiến độ cũ)!"); initSheetSelect();
                 } else { alert("Lỗi định dạng dữ liệu tệp!"); }
             } catch (err) { alert("Lỗi: " + err.message); }
         };
